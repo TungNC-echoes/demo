@@ -10,19 +10,78 @@
     <title>DEMO</title>
 </head>
 <body>
-<canvas id="c" width="500" height="500" style="border: 1px solid black;" ></canvas>
+<p>Please select your color:</p>
+<div style="display: flex">
+    <input type="radio" name="color" value="black" checked> Black<br>
+    <input type="radio" name="color" value="blue"> Blue<br>
+    <input type="radio" name="color" value="red"> Red<br>
+    <input type="radio" name="color" value="green"> Green<br>
+    <input type="radio" name="color" value="gray"> Gray<br>
+    <input type="radio" name="color" value="orange"> Orange<br>
+    <input type="radio" name="color" value="yellow"> Yellow<br>
+</div>
+<div>
+    <input type="checkbox" name="paint" id="paint"> Paint <br>
+</div>
+<select id="font">
+    <option>arial</option>
+    <option>tahoma</option>
+    <option>times new roman</option>
+</select>
+<button id="clear">Clear</button>
+<br/>
+<canvas id="canvas" style="border: 1px solid black;"></canvas>
 <script>
-    var canvas = new fabric.Canvas('c', {
-        backgroundImage: 'img_lights.jpg'
-    });
-    var textbox = new fabric.Textbox('Lorum ipsum dolor sit amet', {
-        left: 50,
-        top: 50,
-        width: 150,
-        fontSize: 30
-    });
-    canvas.add(textbox).setActiveObject(textbox);
+    const canvas = new fabric.Canvas('canvas');
+    //drawing canvas
+    canvas.isDrawingMode = 1;
+    canvas.freeDrawingBrush.color = "black";
+    canvas.freeDrawingBrush.width = 2;
+    canvas.renderAll();
 
+    fabric.Image.fromURL('img_lights.jpg', function (oImg) {
+        canvas.setDimensions({width: oImg.width, height: oImg.height});
+        canvas.setBackgroundImage(oImg, canvas.renderAll.bind(canvas));
+    });
+    $('input[name=color]').on("change keyup", function () {
+        var obj = canvas.getActiveObject();
+
+        if (obj) {
+            obj.set("fill", this.value);
+        }
+        canvas.renderAll();
+    });
+
+    $('#font').change(function () {
+        var obj = canvas.getActiveObject();
+
+        if (obj) {
+            obj.set("fontFamily", this.value);
+        }
+
+        canvas.renderAll();
+    });
+
+    function addText(e) {
+        var oText = new fabric.IText('Tap and Type', {
+            top: e.offsetY,
+            cursorDuration: 200,
+            left: e.offsetX,
+        });
+
+        canvas.add(oText);
+        oText.bringToFront();
+        canvas.setActiveObject(oText);
+        $('#fill, #font').trigger('change');
+    }
+
+    canvas.on('mouse:down', function (options) {
+        if (options.target == null)
+            addText(options.e);
+    });
+    // clear
+    clearEl = $('clear');
+    clearEl.onclick = function() { canvas.clear() };
 </script>
 </body>
 </html>
